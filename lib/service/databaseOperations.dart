@@ -1,5 +1,7 @@
 
 
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,62 +11,33 @@ import '../app_routes.dart';
 class DatabaseOperationsFirebase {
   final db = FirebaseFirestore.instance;
 
-  Future<void> createNewUserFirebase(String nome, String email, String cpf,
-      String datanasc, String telefone) async {
 
-    final user = <String, dynamic>{
-      "nome": nome,
-      "email": email,
-      "cpf": cpf,
-      "datanasc": datanasc,
-      "telefone": telefone,
+  Future<void> infoCountryDB(String name, bool favorito, String flag, String region, String googleMaps, int population) async {
+    final country = <String,dynamic>{
+      "name": name,
+      "flag": flag,
+      "region": region,
+      "googleMaps": googleMaps,
+      "population": population,
+      "favorito": favorito
     };
-
-    await db.collection("users").add(user).then((documentSnapshot) =>
-        print("Added Data with ID: ${documentSnapshot.id}"));
+    await db.collection("country").add(country);
   }
 
-  Future<List<Map<String, dynamic>>> getUserFirebase() async {
-
-    List<Map<String, dynamic>> userList = [];
-
-    QuerySnapshot<Map<String, dynamic>> querySnapshot =
-      await db.collection("users").get();
-
-    querySnapshot.docs.forEach((doc) {
-      userList.add(doc.data());
-    });
-
-    return userList;
-
-  }
-
-  Future<void> deleteRowFirebase(String cpf) async {
-
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await db.collection("users").where("cpf", isEqualTo: cpf).get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentSnapshot<Map<String, dynamic>> documentSnapshot = querySnapshot.docs.first;
-
-      await db.collection("users").doc(documentSnapshot.id).delete();
-
-      print("Documento com CPF $cpf deletado com sucesso.");
-    } else {
-      print("Nenhum documento encontrado com o CPF $cpf.");
-    }
-  }
-
-  Future<void> updateRowFirebase(String nomeatual, String nomenovo) async {
-    QuerySnapshot<Map<String, dynamic>> querySnapshot = await db.collection(
-        "users").where("nome", isEqualTo: nomeatual).get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentSnapshot<Map<String, dynamic>> documentSnapshot = querySnapshot
-          .docs.first;
-
-      await db.collection("users").doc(documentSnapshot.id).update(
-          {"nome": nomenovo});
-    }
+  Future<List<Map<String, dynamic>>> getCountry() async {
+    QuerySnapshot snapshot = await db.collection('country').where('favorito', isEqualTo: true).get();
+    print(snapshot.docs);
+    return snapshot.docs.map((doc) {
+      return {
+        'id': doc.id,
+        "name": doc['name'],
+        "flag": doc['flag'],
+        "region": doc['region'],
+        "googleMaps": doc['googleMaps'],
+        "population": doc['population'],
+        "favorito": doc['favorito']
+      };
+    }).toList();
   }
 
   Future<void> createUserWithEmailPass(context, String email, String senha) async {

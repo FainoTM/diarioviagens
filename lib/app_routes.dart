@@ -1,29 +1,31 @@
-import 'package:dev/view/cadastroPessoa.dart';
+import 'package:dev/model/country_model.dart';
+import 'package:dev/view/detail_page.dart';
 import 'package:dev/view/forgotPage.dart';
 import 'package:dev/view/home_page.dart';
-import 'package:dev/view/listarPessoa.dart';
 import 'package:dev/view/login.dart';
 import 'package:dev/view/signUpPage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 
-class AppRoutes{
-  static const homePage = '/homePage';
-  static const cadastrarPessoa = '/pages/cadastroPessoa';
-  static const listarPessoa = '/pages/listarPessoa';
-  static const login = '/pages/login';
-  static const signUp = '/pages/signUpPage';
-  static const forgotPage = '/pages/forgotPage';
-  static const webPage = '/components/webView';
+class AppRoutes {
+  static const homePage = '/view/homePage';
+  static const login = '/view/login';
+  static const signUp = '/view/signUpPage';
+  static const forgotPage = '/view/forgotPage';
+  static const detailPage = '/view/detail_page';
 
-
-  static Map<String, WidgetBuilder> define() {
-    return {
-      homePage: (BuildContext context) => HomePage(),
-      cadastrarPessoa: (BuildContext context) => const CadastroPessoa(),
-      listarPessoa: (BuildContext context) => const ListarPessoas(),
-      login: (BuildContext context) => const LoginPage(),
-      signUp: (BuildContext context) => const SignUpPage(),
-      forgotPage: (BuildContext context) => ForgotPage(),
-    };
+  static List<GetPage> define() {
+    return [
+      GetPage(name: homePage, page: () => HomePage()),
+      GetPage(name: login, page: () => LoginPage()),
+      GetPage(name: signUp, page: () => SignUpPage()),
+      GetPage(name: forgotPage, page: () => ForgotPage()),
+      GetPage(
+          name: detailPage,
+          page: () {
+            final Country country = Get.arguments;
+            return DetailPage(country: country);
+          })
+    ];
   }
 }

@@ -23,4 +23,5 @@ class CountryController extends GetxController {
       isLoading(false);
     }
   }
+
 }

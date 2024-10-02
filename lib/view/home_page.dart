@@ -1,106 +1,72 @@
-import 'package:dev/model/country_model.dart';
-import 'package:dev/service/country_api.dart';
+
+import 'package:dev/view/detail_page.dart';
+import 'package:dev/view/list_favorite.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../app_routes.dart';
-import '../service/databaseOperations.dart';
+import '../controller/country_controller.dart';
+import '../model/country_model.dart';
 
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final CountryApi _getcountry = CountryApi();
-  List<Country> _countrys = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCountry();
-  }
-
-  Future<void> _fetchCountry() async {
-    try {
-      var country = await _getcountry.getCountrys();
-      setState(() {
-        _countrys = country;
-      });
-    } catch (e) {
-      throw Exception('erro $e');
-    }
-  }
+class HomePage extends StatelessWidget {
+  final CountryController countryController = Get.put(CountryController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(
-          'Página Inicial', style: TextStyle(color: Colors.white),
+      appBar: AppBar(
+        title: Text(
+          'Visitar Países',
+          style: TextStyle(color: Colors.white),
         ),
-            toolbarHeight: 70,
-            centerTitle: true,
-            backgroundColor: Colors.blueAccent,
-            actions: [
-              IconButton(
-                icon: Icon(Icons.logout, color: Colors.white,),
-                onPressed: (){
-                  DatabaseOperationsFirebase().signOutUser();
-                  Navigator.pushNamed(context, AppRoutes.login);
-                },
-              ),]
-        ),
-        body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _countrys.isEmpty
-                ? Center(
-              child: CircularProgressIndicator(),
-            )
-                : ListView.builder(
-                itemCount: _countrys.length,
-                itemBuilder: (context, index) {
-                  return Center(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        height: 200,
-                        child: Column(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text('Autor: ${_countrys[index].flag}'),
-                                Text('Preço: ${_countrys[index].name}'),
-                              ],
-                            )
-                          ],
+        actions: [
+          IconButton(onPressed: () {
+            Get.to(() => FavoritePage());
+          }, icon: Icon(Icons.favorite))
+        ],
+        backgroundColor: Colors.blueAccent,
+        toolbarHeight: 50,
+        centerTitle: true,
+      ),
+      body: Obx(() {
+        if (countryController.isLoading.value) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, 50),
+                child: ListView.builder(
+                  itemCount: countryController.countrys.length,
+                  itemBuilder: (context, index) {
+                    Country country = countryController.countrys[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Get.to(() => DetailPage(country: country));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Card(
+                          margin:
+                          EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                          elevation: 8,
+                          shadowColor: Colors.black,
+                          child: ListTile(
+                            title: Text(country.name),
+                            subtitle: Text(country.population.toString()),
+                            leading: Image.network(country.flag, width: 80,),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                })));
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
   }
 }
-
-/*
-GridView.count(
-          scrollDirection: Axis.vertical,
-          crossAxisCount: 1,
-          children: List.generate(
-            10,
-            (index) {
-              return Center(
-                  child: Container(
-                child: Row(
-                  children: [
-                    Text('imagem'),
-                    Column(
-                      children: [Text('title'), Text('Descrição $index')],
-                    )
-                  ],
-                ),
-              ));
-            },
-          )),*/

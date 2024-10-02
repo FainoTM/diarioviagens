@@ -12,10 +12,10 @@ class CountryApi {
       final response = await dio.get(
           apiLink);
       if (response.statusCode == 200) {
-        List<Country> countrys = (response.data)
+        List<dynamic> results = response.data;
+        return results
             .map((countryData) => Country.fromJson(countryData))
             .toList();
-        return countrys;
       } else {
         throw Exception('Falha ao carregar os livros');
       }
